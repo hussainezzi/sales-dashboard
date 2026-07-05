@@ -63,6 +63,10 @@
       <h3>💳 Payment Status</h3>
       <canvas id="paymentChart"></canvas>
     </div>
+    <div class="chart-card">
+      <h3>🏆 Top Selling Products</h3>
+      <canvas id="productChart"></canvas>
+    </div>
     <div class="chart-card" style="grid-column: 1 / -1;">
       <h3>📄 Invoice Details</h3>
       <div style="overflow-x: auto;">
@@ -164,6 +168,32 @@ function init() {
         }
       }
     });
+
+    // Product chart
+    if (d.products && d.products.length) {
+      const topN = d.products.slice(0, 8);
+      new Chart(document.getElementById('productChart'), {
+        type: 'bar',
+        data: {
+          labels: topN.map(p => p.name.length > 20 ? p.name.slice(0, 18) + '..' : p.name),
+          datasets: [{
+            label: 'Sales (Rs.)',
+            data: topN.map(p => p.total),
+            backgroundColor: ['#3b82f6','#22c55e','#f59e0b','#ef4444','#a78bfa','#ec4899','#14b8a6','#f97316'],
+            borderRadius: 6
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: '#94a3b8', callback: v => 'Rs. ' + fmtRs(v) }, grid: { color: '#334155' }, beginAtZero: true },
+            y: { ticks: { color: '#94a3b8' }, grid: { display: false } }
+          }
+        }
+      });
+    }
 
     // Payment chart
     new Chart(document.getElementById('paymentChart'), {
