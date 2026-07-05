@@ -1,0 +1,135 @@
+{
+  "company": "Bismillah Traders",
+  "period": "Jan 06, 2026 \u2013 Jul 05, 2026",
+  "generated": "2026-07-05 18:39 PKT",
+  "summary": {
+    "total_invoices": 12,
+    "grand_total": 1400123.34,
+    "net_sales": 1221002.0,
+    "total_tax": 179121.34,
+    "paid": 236.34,
+    "unpaid": 1399887.0,
+    "paid_count": 1,
+    "unpaid_count": 11
+  },
+  "monthly": {
+    "2026-04": {
+      "count": 1,
+      "total": 31750.0
+    },
+    "2026-05": {
+      "count": 11,
+      "total": 1368373.34
+    }
+  },
+  "invoices": [
+    {
+      "invoice": "INV/2026/00007",
+      "date": "2026-04-21",
+      "customer": "Acme Corporation",
+      "total": 31750.0,
+      "untaxed": 31750.0,
+      "tax": 0.0,
+      "paid": false
+    },
+    {
+      "invoice": "INV/2026/00004",
+      "date": "2026-05-01",
+      "customer": "Azure Interior",
+      "total": 31750.0,
+      "untaxed": 31750.0,
+      "tax": 0.0,
+      "paid": false
+    },
+    {
+      "invoice": "INV/2026/00006",
+      "date": "2026-05-03",
+      "customer": "Acme Corporation",
+      "total": 19250.0,
+      "untaxed": 19250.0,
+      "tax": 0.0,
+      "paid": false
+    },
+    {
+      "invoice": "INV/2026/00003",
+      "date": "2026-05-03",
+      "customer": "Gemini Furniture",
+      "total": 8000.0,
+      "untaxed": 8000.0,
+      "tax": 0.0,
+      "paid": false
+    },
+    {
+      "invoice": "INV/2026/00005",
+      "date": "2026-05-04",
+      "customer": "Acme Corporation",
+      "total": 41750.0,
+      "untaxed": 41750.0,
+      "tax": 0.0,
+      "paid": false
+    },
+    {
+      "invoice": "INV/2026/00002",
+      "date": "2026-05-04",
+      "customer": "Punjab Customer",
+      "total": 9745.0,
+      "untaxed": 8900.0,
+      "tax": 845.0,
+      "paid": false
+    },
+    {
+      "invoice": "INV/2026/00001",
+      "date": "2026-05-05",
+      "customer": "Punjab Customer",
+      "total": 90652.0,
+      "untaxed": 82400.0,
+      "tax": 8252.0,
+      "paid": false
+    },
+    {
+      "invoice": "INV/2026/00008",
+      "date": "2026-05-07",
+      "customer": "Hozefa",
+      "total": 236.34,
+      "untaxed": 202.0,
+      "tax": 34.34,
+      "paid": true
+    },
+    {
+      "invoice": "INV/2026/00009",
+      "date": "2026-05-09",
+      "customer": "Hozefa",
+      "total": 2340.0,
+      "untaxed": 2000.0,
+      "tax": 340.0,
+      "paid": false
+    },
+    {
+      "invoice": "INV/2026/00010",
+      "date": "2026-05-10",
+      "customer": "Mr A",
+      "total": 1053000.0,
+      "untaxed": 900000.0,
+      "tax": 153000.0,
+      "paid": false
+    },
+    {
+      "invoice": "INV/2026/00011",
+      "date": "2026-05-11",
+      "customer": "Anthony",
+      "total": 59000.0,
+      "untaxed": 50000.0,
+      "tax": 9000.0,
+      "paid": false
+    },
+    {
+      "invoice": "INV/2026/00012",
+      "date": "2026-05-23",
+      "customer": "Burhanuddin Tamba",
+      "total": 52650.0,
+      "untaxed": 45000.0,
+      "tax": 7650.0,
+      "paid": false
+    }
+  ]
+}

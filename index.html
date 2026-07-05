@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bismillah Traders — Sales Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; padding: 20px; }
+  .container { max-width: 1280px; margin: 0 auto; }
+  h1 { font-size: 1.8rem; font-weight: 600; color: #f1f5f9; }
+  .subtitle { color: #94a3b8; margin-top: 4px; font-size: 0.9rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin: 24px 0; }
+  .card { background: #1e293b; border-radius: 12px; padding: 20px; border: 1px solid #334155; }
+  .card .label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; }
+  .card .value { font-size: 1.6rem; font-weight: 700; margin-top: 6px; }
+  .green { color: #22c55e; }
+  .red { color: #ef4444; }
+  .amber { color: #f59e0b; }
+  .blue { color: #38bdf8; }
+  .purple { color: #a78bfa; }
+  .charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 16px; margin: 24px 0; }
+  .chart-card { background: #1e293b; border-radius: 12px; padding: 20px; border: 1px solid #334155; }
+  .chart-card h3 { font-size: 0.9rem; color: #94a3b8; margin-bottom: 12px; }
+  canvas { max-height: 280px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+  th { text-align: left; font-size: 0.75rem; text-transform: uppercase; color: #64748b; padding: 8px 12px; border-bottom: 1px solid #334155; }
+  td { padding: 10px 12px; border-bottom: 1px solid #1e293b; font-size: 0.85rem; }
+  tr:hover { background: #1e293b; }
+  .badge { display: inline-block; font-size: 0.7rem; padding: 2px 10px; border-radius: 99px; font-weight: 600; }
+  .badge-paid { background: #166534; color: #86efac; }
+  .badge-unpaid { background: #7f1d1d; color: #fca5a5; }
+  .footer { text-align: center; color: #475569; font-size: 0.8rem; margin-top: 40px; padding: 20px; border-top: 1px solid #1e293b; }
+  .pk { font-feature-settings: "zero"; }
+  @media (max-width: 600px) {
+    .charts { grid-template-columns: 1fr; }
+    .grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap;">
+    <div>
+      <h1>📊 Bismillah Traders</h1>
+      <p class="subtitle" id="period"></p>
+    </div>
+    <div style="text-align: right;">
+      <p class="subtitle" id="generated"></p>
+    </div>
+  </div>
+
+  <div class="grid" id="summaryCards"></div>
+
+  <div class="charts">
+    <div class="chart-card">
+      <h3>📅 Monthly Sales</h3>
+      <canvas id="monthlyChart"></canvas>
+    </div>
+    <div class="chart-card">
+      <h3>💳 Payment Status</h3>
+      <canvas id="paymentChart"></canvas>
+    </div>
+    <div class="chart-card" style="grid-column: 1 / -1;">
+      <h3>📄 Invoice Details</h3>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Invoice</th>
+              <th>Date</th>
+              <th>Customer</th>
+              <th style="text-align:right;">Total (Rs.)</th>
+              <th style="text-align:right;">Tax (Rs.)</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="invoiceTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">Bismillah Traders Accounts AI · Data from Odoo · Updated real-time</div>
+</div>
+
+<script>
+const DATA = null; // injected below
+
+async function loadData() {
+  const res = await fetch('data.json?' + Date.now());
+  return await res.json();
+}
+
+function fmt(n) {
+  if (n === undefined || n === null) return '0';
+  const parts = Math.round(n).toString().split('');
+  const int = parts.slice(0, parts.length).join('');
+  let out = '';
+  let count = 0;
+  for (let i = int.length - 1; i >= 0; i--) {
+    if (count > 0 && count % 3 === 0) out = ',' + out;
+    out = int[i] + out;
+    count++;
+  }
+  return out;
+}
+
+function fmtRs(n) {
+  const num = Math.round(n).toString();
+  const last3 = num.slice(-3);
+  const rest = num.slice(0, -3);
+  const restFmt = rest ? rest.replace(/\B(?=(\d{2})+(?!\d))/g, ',') : '';
+  return (restFmt ? restFmt + ',' : '') + last3;
+}
+
+function init() {
+  loadData().then(d => {
+    const s = d.summary;
+
+    document.getElementById('period').textContent = d.period;
+    document.getElementById('generated').textContent = 'Updated: ' + d.generated;
+
+    const cards = [
+      { label: 'Total Invoices', value: s.total_invoices, cls: 'blue' },
+      { label: 'Net Sales', value: 'Rs. ' + fmtRs(s.net_sales), cls: 'green' },
+      { label: 'Total Tax', value: 'Rs. ' + fmtRs(s.total_tax), cls: 'amber' },
+      { label: 'Grand Total', value: 'Rs. ' + fmtRs(s.grand_total), cls: 'purple' },
+      { label: 'Paid', value: 'Rs. ' + fmtRs(s.paid) + ' (' + s.paid_count + ')', cls: 'green' },
+      { label: 'Unpaid', value: 'Rs. ' + fmtRs(s.unpaid) + ' (' + s.unpaid_count + ')', cls: 'red' },
+    ];
+    document.getElementById('summaryCards').innerHTML = cards.map(c =>
+      `<div class="card"><div class="label">${c.label}</div><div class="value ${c.cls}">${c.value}</div></div>`
+    ).join('');
+
+    // Monthly chart
+    const months = Object.keys(d.monthly);
+    const mTotals = months.map(m => d.monthly[m].total);
+    const mCounts = months.map(m => d.monthly[m].count);
+    const monthLabels = months.map(m => {
+      const [y, mo] = m.split('-');
+      const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return names[parseInt(mo)-1] + ' ' + y;
+    });
+
+    new Chart(document.getElementById('monthlyChart'), {
+      type: 'bar',
+      data: {
+        labels: monthLabels,
+        datasets: [
+          { label: 'Sales (Rs.)', data: mTotals, backgroundColor: '#3b82f6', borderRadius: 6, yAxisID: 'y' },
+          { label: 'Count', data: mCounts, backgroundColor: '#22c55e', borderRadius: 6, yAxisID: 'y1' }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { labels: { color: '#94a3b8' } } },
+        scales: {
+          x: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
+          y: { ticks: { color: '#94a3b8', callback: v => 'Rs. ' + fmtRs(v) }, grid: { color: '#334155' }, beginAtZero: true },
+          y1: { position: 'right', ticks: { color: '#22c55e', stepSize: 1 }, grid: { display: false }, beginAtZero: true }
+        }
+      }
+    });
+
+    // Payment chart
+    new Chart(document.getElementById('paymentChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Paid (Rs. ' + fmtRs(s.paid) + ')', 'Unpaid (Rs. ' + fmtRs(s.unpaid) + ')'],
+        datasets: [{
+          data: [s.paid, s.unpaid],
+          backgroundColor: ['#22c55e', '#ef4444'],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom', labels: { color: '#94a3b8', padding: 16 } }
+        }
+      }
+    });
+
+    // Invoice table
+    const tbody = document.getElementById('invoiceTable');
+    tbody.innerHTML = d.invoices.map(inv =>
+      `<tr>
+        <td><strong>${inv.invoice}</strong></td>
+        <td>${inv.date}</td>
+        <td>${inv.customer}</td>
+        <td style="text-align:right;">Rs. ${fmtRs(inv.total)}</td>
+        <td style="text-align:right;">Rs. ${fmtRs(inv.tax)}</td>
+        <td><span class="badge ${inv.paid ? 'badge-paid' : 'badge-unpaid'}">${inv.paid ? 'Paid' : 'Unpaid'}</span></td>
+      </tr>`
+    ).join('');
+  });
+}
+init();
+</script>
+</body>
+</html>
